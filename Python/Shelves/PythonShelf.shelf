@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="PythonShelf0" label="Python Tools">
+    <memberTool name="pyside_sops"/>
+    <memberTool name="001_OutNode"/>
+    <memberTool name="002_GlobalVars"/>
+    <memberTool name="003_NoisePoint"/>
+    <memberTool name="pyside_002"/>
+  </toolshelf>
+
+  <tool name="001_OutNode" label="Out Node" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+
+    
+# Houdini Python shelf tool
+# Adding a null after selected node
+# 
+selAll = hou.selectedNodes()
+if len(selAll) > 0:
+    s = selAll[0]
+    sel = hou.node(s.path())
+    p = hou.node(s.path()).parent()
+    
+    o = p.createNode('null')
+    o.setName("OUT", True)
+    c = hou.Color()
+    c.setRGB([0,1,0])
+    o.setColor(c)
+    o.setCurrent(True, True)
+    o.setFirstInput(sel)
+    o.moveToGoodPosition()
+
+    o.setDisplayFlag(True)
+    o.setRenderFlag(True)
+
+    ]]></script>
+  </tool>
+
+  <tool name="002_GlobalVars" label="GlobalVars" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+
+'''
+Utility to print Environment variables in Houdini
+
+$HFS = Houdini Installation
+$HOME = Houdini user data path
+$HIP = Workspace(location) of current hip file
+
+'''
+
+#--------------------------
+# FUNCTIONS
+#--------------------------
+
+def printVars():
+    print "\n"
+    print "-----------------------"
+    print "Environment Variables"
+    print "-----------------------"
+    for v in varsToPrint:
+        print "$"+ v + '\t' + str(hou.getenv(v))
+    print "-----------------------"
+
+#--------------------------
+# START HERE
+#--------------------------
+
+varsToPrint = ["HFS", "HOME", "HIP","JOB"]
+printVars()
+
+    ]]></script>
+  </tool>
+
+  <tool name="003_NoisePoint" label="NoisePoint" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+
+# Noise Point Tool
+for node in hou.selectedNodes():
+
+    t_parms = ["$TX","$TY","$TZ"]
+    position_tuple = node.parmTuple("t")
+
+    # Add parm template
+    frequency_template = hou.FloatParmTemplate('frequency', 'Frequency', 3, (1,1,1))
+    amplitude_template = hou.FloatParmTemplate('amplitude', 'Amplitude', 3, (1,1,1))
+    folder_template = hou.FolderParmTemplate("noise_folder", "Noise Settings", [frequency_template, amplitude_template])
+
+    parm_group = node.parmTemplateGroup()
+    parm_group.insertBefore('group', folder_template)
+    #parm_group.insertBefore(amplitude_template, frequency_template)
+    node.setParmTemplateGroup(parm_group)
+
+    
+    for index, parm in enumerate(position_tuple):
+        parm.deleteAllKeyframes()
+        parm.setExpression(t_parms[index] + " + noise($TX * ch('frequencyx'), $TY * ch('frequencyy') + " + str(index * 500) + ", $TZ * ch('frequencyz'))")
+
+]]></script>
+  </tool>
+
+  <tool name="pyside_002" label="pyside_002" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from PySide import QtCore, QtGui
+
+class CustomWidget(QtGui.QFrame):
+    def __init__(self, parent=None):
+        QtGui.QFrame.__init__(self, parent)
+
+        # Give the frame a border so that we can see it.
+        self.setFrameStyle(1)
+
+        layout = QtGui.QVBoxLayout()
+        self.label = QtGui.QLabel('Test')
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+
+    def resizeEvent(self, event):
+        # Create a square base size of 10x10 and scale it to the new size
+        # maintaining aspect ratio.
+        new_size = QtCore.QSize(600, 800)
+        new_size.scale(event.size(), QtCore.Qt.KeepAspectRatio)
+        self.resize(new_size)
+
+class MainWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+       QtGui.QWidget.__init__(self, parent)
+
+       layout = QtGui.QVBoxLayout()
+       self.custom_widget = CustomWidget()
+       layout.addWidget(self.custom_widget)
+       self.setLayout(layout)
+
+
+try:    app = QtGui.QApplication(['houdini'])
+except: app = QtGui.QApplication.instance()
+
+window = MainWidget()
+window.show()
+sys.exit(app.exec_())]]></script>
+  </tool>
+
+  <tool name="pyside_sops" label="SOPs" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+# Houdini-PySide Test
+# A small test learned/copied from Youtube user vuxster.
+
+# A floating toolbar for commonly used SOPs
+
+import hou
+from PySide import QtCore as qtc
+from PySide import QtGui as qtg
+from functools import partial
+
+#-------------------------------------------------------------------
+
+try:    app = qtg.QApplication(['houdini'])
+except: app = qtg.QApplication.instance()
+
+eventLoop = qtc.QEventLoop()
+
+def qt_callback():
+    if not ctl.isVisible():
+        try:    hou.ui.removeEventLoopCallback(qt_callback)
+        except: pass
+    eventLoop.processEvents()
+    app.sendPostedEvents(None, 0)
+#-------------------------------------------------------------------
+ctl = None
+def show(ctl_):
+    global ctl
+    ctl = ctl_
+    ctl.show()
+    hou.ui.addEventLoopCallback(qt_callback)
+#-------------------------------------------------------------------
+def create_sop(sopName = "null"):
+    selAll = hou.selectedNodes()
+    if len(selAll) > 0:
+        s = selAll[0]
+        sel = hou.node(s.path())
+        p = hou.node(s.path()).parent()
+        
+        o = p.createNode(sopName)
+        o.setName(sopName, True)
+        c = hou.Color()
+        c.setRGB([0,1,0])
+        #o.setColor(c)
+        o.setCurrent(True, True)
+        try:
+            o.setFirstInput(sel)
+        except:
+            pass
+        o.moveToGoodPosition()
+    
+        o.setDisplayFlag(True)
+        o.setRenderFlag(True)
+
+
+widget = qtg.QFrame()
+widget.setFrameShape(qtg.QFrame.StyledPanel)
+wsize = qtc.QSize(400,200)
+#wsize.setWidth(400,200)
+#widget.sizeHint(wsize)
+widget.setWindowFlags(qtc.Qt.WindowStaysOnTopHint)
+
+#widget.setWindowFlags(qtc.Qt.FramelessWindowHint | qtc.Qt.WindowStaysOnTopHint)
+layout = qtg.QVBoxLayout(widget)
+
+#-------------------------------------------------------------------
+sops = []
+sops.append("NULL")
+sops.append("Group")
+sops.append("Merge")
+sops.append("Xform")
+sops.append("Box")
+sops.append("Grid")
+sops.append("Skin")
+sops.append("Circle")
+sops.append("Facet")
+sops.append("Carve")
+
+#-------------------------------------------------------------------
+
+for i in range(0, len(sops)):
+    sop = sops[i]
+    b = qtg.QPushButton(sop, widget)
+    b.setFixedWidth(150)
+    if i < 4:  
+        b.setStyleSheet('QPushButton {background-color: blue; color: yellow}')
+    b.clicked.connect(partial(create_sop,sop.lower()))
+    layout.addWidget(b)
+
+b2 = qtg.QPushButton("Close", widget)
+b2.clicked.connect(widget.hide)
+layout.addWidget(b2)
+
+show(widget)
+
+]]></script>
+  </tool>
+</shelfDocument>

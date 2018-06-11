@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<canvas id = 'c' width = '600' height = '600'></canvas>
+
+<script src="webgl_utils.js">
+</script>
+
+<script id='vshader' type='x-shader'>
+	attribute vec2 aVertexPosition;
+	void main()
+	{
+		gl_Position = vec4(aVertexPosition, 0, 1);
+	}
+
+</script>
+
+<script id='fshader' type='x-shader'>
+
+
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+	precision highp float;
+#else
+	precision mediump float;
+#endif
+
+	precision mediump int;
+	uniform vec2 uCanvasSize;
+
+	vec4 calc(vec2 texCoords)
+	{
+		float x = 0.0;
+		float y = 0.0;
+
+		for(int i = 0; i < 100; i++)
+		{
+			float xTemp = x*x - y*y + texCoords.x;
+			y = 2.0*x*y + texCoords.y;
+			x = xTemp;
+			if(x*x + y*y >= 10.0)
+			{
+				float d = float(i) / 30.0;
+				//d = (x*x + y*y) * 0.01;
+				return vec4(d,d,d,1);
+			}
+
+		}
+
+		return vec4(0,0,0, 1.0);
+	}
+
+	void main()
+	{
+		vec2 texCoords = (gl_FragCoord.xy / uCanvasSize.xy) * 2.0 - vec2(1.0, 1.0);
+		gl_FragColor = calc(texCoords);
+	}
+
+</script>
+
+<script>
+// ------------------------------------------------------------------------------------
+	// Creates and links program with given shaders
+	function createProgram(vstr, fstr)
+	{
+		var program = gl.createProgram();
+		var vshader = createShader(vstr, gl.VERTEX_SHADER);
+		var fshader = createShader(fstr, gl.FRAGMENT_SHADER);
+
+		gl.attachShader(program, vshader);
+		gl.attachShader(program, fshader);
+		gl.linkProgram(program);
+
+		return program;
+	}
+// ------------------------------------------------------------------------------------
+	// Reads and compiles both shaders
+	function createShader(str, type)
+	{
+		var shader = gl.createShader(type);
+		gl.shaderSource(shader, str);
+		gl.compileShader(shader);
+
+		// Throw and exception is shader compilation fails
+		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+		{
+			throw gl.getShaderInfoLog(shader);
+		}
+		return shader;
+	}
+
+// ------------------------------------------------------------------------------------
+	var c = document.getElementById('c');
+	var gl = c.getContext('experimental-webgl');
+
+	// Clear canvas with a fixed color
+	var backColor = 0.3;
+	gl.clearColor(backColor, backColor, backColor, 1);
+	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	var vertexPosBuffer = screenQuad();
+	// Shader code
+	var vs = document.getElementById('vshader').textContent;
+	var fs = document.getElementById('fshader').textContent;
+
+	// gl Program
+	var program = createProgram(vs, fs);
+	gl.useProgram(program);
+
+	program.getVertexPosAttrib = gl.getAttribLocation(program, 'aVertexPosition');
+	program.canvasSizeUniform = gl.getUniformLocation(program, 'uCanvasSize');
+	gl.enableVertexAttribArray(program.vertexPosArray);
+
+	gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.uniform2f(program.canvasSizeUniform, c.width, c. height);
+
+	// DRAW
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems);
+
+</script>
+
+</html>

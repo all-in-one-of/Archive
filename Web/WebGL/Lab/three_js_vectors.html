@@ -1,0 +1,52 @@
+
+<html>
+
+	<head>
+		<title>Three.js Intro</title>
+		<style>canvas {width: 100%; height: 100%} </style>
+	</head>
+	<body>
+		<script src="js/three.min.js"></script>
+		<script>
+			// Code
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(500,500);
+			document.body.appendChild(renderer.domElement);
+
+			var geometry = new THREE.BoxGeometry(1,1,1);
+			var material = new THREE.MeshLambertMaterial({color : 0x0055ff});
+			var cube = new THREE.Mesh(geometry, material);
+			
+			var object = new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector(0,0,0), 50);
+			object.position.set(0,0,0);
+			scene.add(object);
+
+			//scene.add(cube);
+
+			for(i=-1; i<1;i++)
+			{
+				pointLight = new THREE.PointLight(0xffffff);
+				pointLight.position.x = i*10;
+				pointLight.position.y = 5;
+				pointLight.position.z = i*10;
+				scene.add(pointLight);
+			}
+
+			camera.position.z = 7;
+
+			function render()
+			{
+				requestAnimationFrame(render);
+				cube.rotation.x += 0.01;
+				cube.rotation.y += 0.01;
+				renderer.render(scene, camera);
+			}
+
+			render();
+
+		</script>
+	</body>
+
+</html>

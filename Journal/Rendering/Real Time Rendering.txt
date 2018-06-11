@@ -1,0 +1,96 @@
+
+This is a blog series on real time rendering in the context of high end console or PC games.
+
+What we are seeking is stable FPS (frames per second) for the interactive experience to be smooth.
+Let's go back first and analyze what is background of FPS.
+
+A video is nothing but a series of static images created to provide illusion of moving picture.
+e.g Kinematograph
+
+e.g Film reel
+
+e.g Animated film
+
+With this understanding, a game or interactive real-time experience is very much like an animated film (or any computer generated imagery) where the next frame is calculated on the fly as opposed to being pre-calculated (or pre-rendered).
+
+The experience (or smoothness of experience) is tied to no. of frames in a second. Humans perceive moving images as a sequence at a rate of 15 or more frames/images in a second. There is another variable in this. It's the "speed" of activity happening in the sequence. The slower the activity and less unique frames are required as opposed to faster ones.
+e.g. Racing car vs. Conversations on a table.
+
+15fps is the lowest possible rate, anything below that and we start to see breaks in the sequence, which will reveal that its true nature is static and not flowing. This in turn, breaks illusion and immersion.
+
+Movies have standard 24fps format. Television has 25fps (PAL) or ~30fps(NTSC).
+
+As for video games this varies. Most of games are played on a TV or PC monitor (and now ever-incresingly on) mobile phones and/or tablets.
+So games have taken TV standards to start with. 30fps.
+In reality, 30 is the minimum rate for optimal experience. As we'll see later, games can run at any fps (with a setting).
+As mentioned above, speed of the activity is also a factor in fps. This is the reason why some games (racing, fighting etc...) require much higher than 30fps.
+They generally use 60fps standard for the immersion.
+In case of fighting games, speed of player input to result on screen is another reason for 60fps. These games are played so fast that 1/60th of a second can make all the difference and with its popularity in e-sports genre, higher and consistent fps is even more important. Hence the name Twitch games, as a subtle twitch of fingers could be a game-changing move.
+
+This is the most crucial and technically challenging distinction.
+A real time experience is controlled by the user of that experience, thats primarily why its not possible to pre-render anything. (With an expception of the design where the experience is carefully crated moments with very limited amount of freedom for the user to make choices -  point and click adventures fall into this category).
+And its also technically challenging because the hardware, software and content has to respect this aspect of the experience.
+
+Below are various technical aspects :
+
+
+
+Hardware
+Let's analyze x86 machine and how it performs calculation.
+Main parts of an x86 machine -
+
+CPU
+CPU (Central Processing Unit) is basically the microprocessor we refer to as computer. This unit is responsible for executing the program loaded in memory using fetch, decode, execute cycle.
+In its basic form it has an ALU (arithmatic and logic unit) responsible for calculations. Bunch of caches to load data from main memory to CPU for calculation. Size of such caches is very small. Control Unit ensures operations of all previous units.
+
+GPU (Optional)
+GPU (Graphics Processing Unit) is also a microprocessor designed to primarily facilitate parallel execution of program. By paralled execution I mean that it takes an instruction and multiple sets of data upon which it execute the instruction. We refer to this as SIMD (Single Instruction Multiple Data) type.
+This parallel model fits perfectly well with the type of operations to be done for rendering triangles.
+The key here is that no data should be dependent on other data being calculated at the same time. Otherwise the parallel model will have a serial dependency and it will break.
+
+Memory
+Storage
+Buses
+
+
+
+
+Software
+Once the hardware is given (or choosen), we move to software aspects of the challenge.
+
+Now the most important job for software is to utilize hardware in best possible way and provide smooth & highest quality experience to the user.
+
+This is implemented at many levels.
+Architecture
+Algorithm
+Program
+
+Architecture
+Software architecture is complecated but beautiful art.
+Basically, the architect will provide solid foundation upon which various domains will build up their components.
+Taking a typical game engine as an example, those components could include gameplay, rendering, control inputs, AI, etc...
+Most of architectures take layer based approach where bottom most layer is interfacing with OS or hardware drivers and top most layer is interfacing with users, such as input or web component.
+
+Algorithm
+Designing efficient algorithms is artwork. In the Art of Programming Donald Knuth shows various sorting algorithms to demonstrate programming.
+Here you could be limited by available hardware components (cache? GPU?) or limitation of hardware (memory size?, speed of bus?).
+
+Program
+And now its upto programmer or developer to write those algorithms under choosen architecture. This is learned by experience to write efficient code and make choices as you go along.
+
+
+
+
+
+Content
+Now we move to content part.
+What do I mean by content? Everything that is created or plugged with the software. Taking DCC apps as example, an image created or re-touched using Photoshop is content. Primitives created in 3ds Max or Maya is content. Web animation made in Flash is also content.
+Some content is created using the program and then used elsewhere (i.e Printed photos after re-touching in Photoshop.). While some other content is created to be used with the same (or a variant) of the Program (Game logic or part of design created to be used with the game itself).
+
+Why does content matter?
+It matters because after all the software exists to serve the content to user.
+And it can't show unlimited amount or variety of content due to many limitations like human ability to digest, hardware limits, programmer time limit etc...
+That's why best experiences have good balance and synergy between content, software and hardware.
+
+
+

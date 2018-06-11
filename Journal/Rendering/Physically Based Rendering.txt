@@ -1,0 +1,35 @@
+
+Physically Based Rendering (PBR)
+--------------------------------
+
+PBR is the new kid on the block of rendering for all computer generated images.
+Movies are doing it and now with latest GPUs and game consoles, video games are doing it too.
+
+Let's understand basics of PBR and why everyone is adopting it.
+
+As name suggests, PBR respects rules of physics in process of rendering.
+Specifically, physics of how light interacts with surfaces.
+
+Needless to say, it's not as sophisticated as the reality but it's certainly one step closer to it.
+Its safe to say that everything in CGI is an approximation.
+Approximation of curved surfaces, rigid body dynamics, realistically rendered surfaces etc...
+And with every generation, we get better in approximating and closer to reality.
+
+Starting from the beginning :
+1. 	We had basic N dot L lighting. (Brightness of surface is proportional to cosine of angle between normal and light vectors).
+
+2. 	Then, Phong & Blinn models. This takes above model as diffuse contribution and introduces specular contribution.
+
+Phong : Specular contribution is proportional to cosine of angle between view & reflection of light vectors.
+Blinn : Half vector?
+
+Both models above divided lighting into various terms.
+Ambient, Diffuse, Specular, Rim, Fresnel etc...
+Each term has a range of user-editable inputs, using which artists achieve desired look.
+And finally all terms are collected to generate resulting pixel color.
+
+3. Enter PBR approach.
+As its evident, in the models above, final look is still heavily dependent on artists' sensibilities and amount of inputs.
+
+
+

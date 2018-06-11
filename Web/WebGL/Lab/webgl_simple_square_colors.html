@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<canvas id = 'c' width = '800' height = '800'></canvas>
+
+<script src="webgl_utils.js">
+</script>
+
+<script id='vshader' type='x-shader'>
+	attribute vec2 aVertexPosition;
+	varying vec2 vTexCoord;
+	uniform vec2 uOffset;
+	void main()
+	{
+		vTexCoord = aVertexPosition + uOffset;
+		gl_Position = vec4(aVertexPosition, 0, 1);
+	}
+
+</script>
+
+<script id='fshader' type='x-shader'>
+
+	precision mediump float;
+	varying vec2 vTexCoord;
+	void main()
+	{
+		gl_FragColor = vec4(vTexCoord, 0, 1);
+	}
+
+</script>
+
+<script>
+// ------------------------------------------------------------------------------------
+	// Creates and links program with given shaders
+	function createProgram(vstr, fstr)
+	{
+		var program = gl.createProgram();
+		var vshader = createShader(vstr, gl.VERTEX_SHADER);
+		var fshader = createShader(fstr, gl.FRAGMENT_SHADER);
+
+		gl.attachShader(program, vshader);
+		gl.attachShader(program, fshader);
+		gl.linkProgram(program);
+
+		return program;
+	}
+// ------------------------------------------------------------------------------------
+	// Reads and compiles both shaders
+	function createShader(str, type)
+	{
+		var shader = gl.createShader(type);
+		gl.shaderSource(shader, str);
+		gl.compileShader(shader);
+
+		// Throw and exception is shader compilation fails
+		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+		{
+			throw gl.getShaderInfoLog(shader);
+		}
+		return shader;
+	}
+
+// ------------------------------------------------------------------------------------
+	var c = document.getElementById('c');
+	var gl = c.getContext('experimental-webgl');
+
+	var offset = [1,1];
+
+	// Clear canvas with a fixed color
+	var backColor = 0.3;
+	gl.clearColor(backColor, backColor, backColor, 1);
+	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	var vertexPosBuffer = screenQuad();
+	// Shader code
+	var vs = document.getElementById('vshader').textContent;
+	var fs = document.getElementById('fshader').textContent;
+
+	// gl Program
+	var program = createProgram(vs, fs);
+	gl.useProgram(program);
+
+	program.getVertexPosAttrib = gl.getAttribLocation(program, 'aVertexPosition');
+	program.offsetUniform = gl.getUniformLocation(program, 'uOffset');
+	gl.enableVertexAttribArray(program.vertexPosArray);
+
+	gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.uniform2f(program.offsetUniform, offset[0], offset[1]);
+
+	// DRAW
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems);
+
+</script>
+
+</html>
